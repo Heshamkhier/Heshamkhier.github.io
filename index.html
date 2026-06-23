@@ -3,608 +3,539 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HTML Viewer</title>
+<title>Hesham Abuel Khier — HR Professional</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #0f1117;
-    --surface: #1a1d27;
-    --surface2: #22263a;
-    --border: #2e3350;
-    --accent: #4f8ef7;
-    --accent2: #7c5cfc;
-    --text: #e8eaf0;
-    --muted: #7b82a0;
-    --success: #3ecf8e;
-    --danger: #f7504f;
-    --radius: 10px;
-    --font: 'Inter', system-ui, -apple-system, sans-serif;
-    --mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+    --navy: #0f2b4a;
+    --navy-mid: #1a3d63;
+    --gold: #c8a96e;
+    --gold-light: #e8c98e;
+    --light: #f7f5f2;
+    --white: #ffffff;
+    --text: #2d3748;
+    --text-muted: #718096;
+    --border: #e2e8f0;
+    --shadow: 0 4px 24px rgba(15,43,74,0.10);
+    --shadow-lg: 0 12px 48px rgba(15,43,74,0.16);
   }
 
-  html, body { height: 100%; }
+  html { scroll-behavior: smooth; }
 
   body {
-    font-family: var(--font);
-    background: var(--bg);
+    font-family: 'Inter', sans-serif;
+    background: var(--light);
     color: var(--text);
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    -webkit-font-smoothing: antialiased;
-  }
-
-  /* ── TOP BAR ── */
-  .topbar {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 24px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-    flex-wrap: wrap;
-  }
-  .topbar .logo {
-    font-size: 17px;
-    font-weight: 700;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    letter-spacing: -.3px;
-    margin-right: 4px;
-  }
-  .topbar .sep { width: 1px; height: 22px; background: var(--border); margin: 0 4px; }
-
-  .file-label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 7px 16px;
-    background: var(--accent);
-    color: #fff;
-    border-radius: 6px;
-    font-size: 13.5px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: opacity .18s, transform .12s;
-    user-select: none;
-    white-space: nowrap;
-  }
-  .file-label:hover { opacity: .88; transform: translateY(-1px); }
-  .file-label:active { transform: translateY(0); opacity: 1; }
-  #fileInput { display: none; }
-
-  .file-name {
-    font-size: 13px;
-    color: var(--muted);
-    max-width: 220px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .file-name.loaded { color: var(--success); }
-
-  .spacer { flex: 1; }
-
-  .tabs {
-    display: flex;
-    gap: 2px;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 3px;
-  }
-  .tab-btn {
-    padding: 5px 14px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 500;
-    border: none;
-    background: transparent;
-    color: var(--muted);
-    cursor: pointer;
-    transition: background .15s, color .15s;
-  }
-  .tab-btn.active {
-    background: var(--surface2);
-    color: var(--text);
-  }
-  .tab-btn:hover:not(.active) { color: var(--text); }
-
-  .action-btn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 7px 14px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background .15s, border-color .15s;
-    white-space: nowrap;
-  }
-  .action-btn:hover { background: var(--border); border-color: var(--accent); }
-
-  /* ── MAIN ── */
-  .main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  /* ── DROP ZONE ── */
-  .drop-zone {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
-    padding: 40px;
-    border: 2px dashed var(--border);
-    margin: 28px;
-    border-radius: 16px;
-    transition: border-color .2s, background .2s;
-    cursor: pointer;
-  }
-  .drop-zone.drag-over {
-    border-color: var(--accent);
-    background: rgba(79,142,247,.06);
-  }
-  .drop-icon {
-    width: 72px;
-    height: 72px;
-    background: var(--surface2);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 30px;
-  }
-  .drop-zone h2 {
-    font-size: 22px;
-    font-weight: 600;
-    color: var(--text);
-  }
-  .drop-zone p {
-    font-size: 14px;
-    color: var(--muted);
-    text-align: center;
-    max-width: 320px;
     line-height: 1.6;
-  }
-  .drop-cta {
-    padding: 10px 24px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: #fff;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    border: none;
-    transition: opacity .18s, transform .12s;
-  }
-  .drop-cta:hover { opacity: .88; transform: translateY(-1px); }
-
-  /* ── VIEWER PANELS ── */
-  .viewer { flex: 1; display: none; flex-direction: column; overflow: hidden; }
-  .viewer.visible { display: flex; }
-
-  /* Preview panel */
-  .preview-panel { flex: 1; display: none; overflow: hidden; }
-  .preview-panel.visible { display: block; }
-  .preview-panel iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-    background: #fff;
+    overflow-x: hidden;
   }
 
-  /* Source panel */
-  .source-panel {
-    flex: 1;
-    display: none;
-    overflow: hidden;
-    position: relative;
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    background: rgba(15,43,74,0.97);
+    backdrop-filter: blur(10px);
+    z-index: 100;
+    padding: 0 2rem;
+    height: 64px;
+    display: flex; align-items: center; justify-content: space-between;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.18);
   }
-  .source-panel.visible { display: flex; flex-direction: column; }
-  .source-toolbar {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 16px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    font-size: 13px;
-    color: var(--muted);
+  .nav-brand {
+    font-family: 'Playfair Display', serif;
+    color: var(--gold);
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-decoration: none;
   }
-  .source-toolbar .badge {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 2px 8px;
-    font-size: 12px;
-    color: var(--text);
-  }
-  .source-code {
-    flex: 1;
-    overflow: auto;
-    padding: 20px 24px;
-    font-family: var(--mono);
-    font-size: 13.5px;
-    line-height: 1.7;
-    white-space: pre;
-    color: #c9d1d9;
-    background: var(--bg);
-  }
-
-  /* Syntax highlight colors */
-  .hl-tag     { color: #7ee787; }
-  .hl-attr    { color: #79c0ff; }
-  .hl-value   { color: #a5d6ff; }
-  .hl-comment { color: #8b949e; font-style: italic; }
-  .hl-doctype { color: #8b949e; }
-  .hl-entity  { color: #ff7b72; }
-  .hl-text    { color: #c9d1d9; }
-
-  /* Split view */
-  .split-panel {
-    flex: 1;
-    display: none;
-    overflow: hidden;
-  }
-  .split-panel.visible { display: flex; }
-  .split-left, .split-right {
-    flex: 1;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-  }
-  .split-left { border-right: 2px solid var(--border); }
-  .split-label {
-    padding: 6px 14px;
-    font-size: 11px;
-    letter-spacing: .08em;
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a {
+    color: rgba(255,255,255,0.82);
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--muted);
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--gold); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 60%, #2a5280 100%);
+    display: flex; align-items: center; justify-content: center;
+    text-align: center;
+    padding: 6rem 2rem 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c8a96e' fill-opacity='0.06'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    opacity: 0.6;
+  }
+  .hero-content { position: relative; max-width: 700px; }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(200,169,110,0.18);
+    color: var(--gold);
+    border: 1px solid rgba(200,169,110,0.4);
+    padding: 0.4rem 1.2rem;
+    border-radius: 2rem;
+    font-size: 0.82rem;
     font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
   }
-  .split-left iframe {
-    flex: 1;
-    border: none;
-    background: #fff;
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.8rem, 6vw, 4.5rem);
+    color: var(--white);
+    line-height: 1.15;
+    margin-bottom: 1.2rem;
+    font-weight: 700;
   }
-  .split-right .source-code {
-    flex: 1;
-    overflow: auto;
+  .hero h1 span { color: var(--gold); }
+  .hero-tagline {
+    font-size: 1.15rem;
+    color: rgba(255,255,255,0.75);
+    max-width: 520px;
+    margin: 0 auto 2.5rem;
+    font-weight: 300;
+    line-height: 1.7;
+  }
+  .hero-cta {
+    display: inline-flex; align-items: center; gap: 0.6rem;
+    background: var(--gold);
+    color: var(--navy);
+    padding: 0.85rem 2rem;
+    border-radius: 0.4rem;
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-decoration: none;
+    letter-spacing: 0.04em;
+    transition: background 0.2s, transform 0.2s;
+    box-shadow: 0 4px 20px rgba(200,169,110,0.35);
+  }
+  .hero-cta:hover { background: var(--gold-light); transform: translateY(-2px); }
+
+  /* SECTIONS */
+  section { padding: 5rem 2rem; }
+  .container { max-width: 1060px; margin: 0 auto; }
+  .section-header { text-align: center; margin-bottom: 3.5rem; }
+  .section-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.6rem;
+    display: block;
+  }
+  .section-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    color: var(--navy);
+    font-weight: 700;
+  }
+  .divider {
+    width: 48px; height: 3px;
+    background: var(--gold);
+    margin: 1rem auto 0;
+    border-radius: 2px;
   }
 
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 8px; height: 8px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
-
-  /* Copy toast */
-  .toast {
-    position: fixed;
-    bottom: 28px;
-    left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: var(--success);
-    color: #fff;
-    padding: 10px 22px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    opacity: 0;
-    transition: opacity .25s, transform .25s;
-    pointer-events: none;
-    z-index: 9999;
-  }
-  .toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-
-  /* Stats bar */
-  .stats-bar {
-    display: none;
+  /* ABOUT */
+  #about { background: var(--white); }
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
     align-items: center;
-    gap: 18px;
-    padding: 6px 20px;
-    background: var(--surface);
-    border-top: 1px solid var(--border);
-    font-size: 12px;
-    color: var(--muted);
+  }
+  .about-avatar-wrap { display: flex; justify-content: center; align-items: center; }
+  .about-avatar {
+    width: 280px; height: 280px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--navy), var(--navy-mid));
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 6rem;
+    color: var(--gold);
+    font-weight: 700;
+    box-shadow: var(--shadow-lg);
+    border: 6px solid var(--gold);
     flex-shrink: 0;
   }
-  .stats-bar.visible { display: flex; }
-  .stats-bar span b { color: var(--text); font-weight: 600; }
+  .about-text h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    color: var(--navy);
+    margin-bottom: 1rem;
+  }
+  .about-text p { color: var(--text-muted); line-height: 1.8; margin-bottom: 1rem; font-size: 1rem; }
+  .about-stats { display: flex; gap: 2rem; margin-top: 2rem; }
+  .stat { text-align: center; }
+  .stat-num { display: block; font-size: 2rem; font-weight: 700; color: var(--navy); font-family: 'Playfair Display', serif; }
+  .stat-label { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
 
-  @media (max-width: 640px) {
-    .topbar { padding: 10px 14px; gap: 8px; }
-    .drop-zone { margin: 14px; padding: 28px 20px; }
-    .split-panel { flex-direction: column; }
-    .split-left { border-right: none; border-bottom: 2px solid var(--border); }
-    .tabs { display: none; }
+  /* SKILLS */
+  #skills { background: var(--light); }
+  .skills-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+  .skill-card {
+    background: var(--white);
+    border-radius: 0.75rem;
+    padding: 1.75rem;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .skill-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+  .skill-icon {
+    width: 48px; height: 48px;
+    background: linear-gradient(135deg, var(--navy), var(--navy-mid));
+    border-radius: 0.5rem;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 1rem;
+    font-size: 1.4rem;
+  }
+  .skill-card h4 { font-size: 1rem; font-weight: 700; color: var(--navy); margin-bottom: 0.4rem; }
+  .skill-card p { font-size: 0.88rem; color: var(--text-muted); line-height: 1.6; }
+
+  /* EXPERIENCE */
+  #experience { background: var(--white); }
+  .timeline { position: relative; padding-left: 2rem; }
+  .timeline::before {
+    content: '';
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--gold), var(--navy));
+    border-radius: 1px;
+  }
+  .timeline-item { position: relative; padding-left: 2rem; padding-bottom: 2.5rem; }
+  .timeline-item::before {
+    content: '';
+    position: absolute; left: -2.45rem; top: 0.35rem;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--gold);
+    border: 3px solid var(--white);
+    box-shadow: 0 0 0 2px var(--gold);
+  }
+  .timeline-date { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.3rem; }
+  .timeline-item h4 { font-size: 1.1rem; font-weight: 700; color: var(--navy); margin-bottom: 0.2rem; }
+  .timeline-company { font-size: 0.9rem; color: var(--text-muted); font-weight: 500; margin-bottom: 0.75rem; }
+  .timeline-item p { font-size: 0.92rem; color: var(--text-muted); line-height: 1.7; }
+  .timeline-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
+  .tag { background: rgba(15,43,74,0.07); color: var(--navy); font-size: 0.75rem; font-weight: 600; padding: 0.25rem 0.75rem; border-radius: 2rem; }
+
+  /* COMPETENCIES */
+  #competencies { background: var(--navy); }
+  #competencies .section-header h2 { color: var(--white); }
+  #competencies .section-label { color: var(--gold); }
+  #competencies .divider { background: var(--gold); }
+  .competencies-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+  .competency-item {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(200,169,110,0.2);
+    border-radius: 0.6rem;
+    padding: 1.25rem 1.5rem;
+    display: flex; align-items: center; gap: 0.75rem;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .competency-item:hover { background: rgba(200,169,110,0.1); border-color: rgba(200,169,110,0.5); }
+  .competency-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); flex-shrink: 0; }
+  .competency-item span { color: rgba(255,255,255,0.88); font-size: 0.92rem; font-weight: 500; }
+
+  /* EDUCATION */
+  #education { background: var(--light); }
+  .education-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+  .edu-card {
+    background: var(--white);
+    border-radius: 0.75rem;
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    border-left: 4px solid var(--gold);
+    transition: transform 0.2s;
+  }
+  .edu-card:hover { transform: translateY(-4px); }
+  .edu-year { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; color: var(--gold); text-transform: uppercase; margin-bottom: 0.5rem; }
+  .edu-card h4 { font-size: 1.05rem; font-weight: 700; color: var(--navy); margin-bottom: 0.25rem; }
+  .edu-card p { font-size: 0.9rem; color: var(--text-muted); }
+
+  /* CONTACT */
+  #contact { background: var(--white); }
+  .contact-box {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+    border-radius: 1rem;
+    padding: 3.5rem;
+    text-align: center;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    overflow: hidden;
+  }
+  .contact-box::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c8a96e' fill-opacity='0.06'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .contact-box h3 { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--white); margin-bottom: 0.75rem; position: relative; }
+  .contact-box p { color: rgba(255,255,255,0.72); margin-bottom: 2rem; position: relative; font-size: 1.05rem; }
+  .contact-links { display: flex; justify-content: center; flex-wrap: wrap; gap: 1rem; position: relative; }
+  .contact-link {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.4rem;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.92rem;
+    transition: transform 0.2s, background 0.2s;
+  }
+  .contact-link.primary { background: var(--gold); color: var(--navy); }
+  .contact-link.primary:hover { background: var(--gold-light); transform: translateY(-2px); }
+  .contact-link.secondary { background: rgba(255,255,255,0.1); color: var(--white); border: 1px solid rgba(255,255,255,0.2); }
+  .contact-link.secondary:hover { background: rgba(255,255,255,0.18); transform: translateY(-2px); }
+
+  /* FOOTER */
+  footer {
+    background: var(--navy);
+    padding: 1.5rem 2rem;
+    text-align: center;
+    color: rgba(255,255,255,0.45);
+    font-size: 0.82rem;
+    border-top: 1px solid rgba(200,169,110,0.15);
+  }
+  footer span { color: var(--gold); }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .about-grid { grid-template-columns: 1fr; text-align: center; }
+    .about-avatar { width: 200px; height: 200px; font-size: 4rem; }
+    .about-stats { justify-content: center; }
+    .nav-links { display: none; }
+    .contact-box { padding: 2.5rem 1.5rem; }
   }
 </style>
 </head>
 <body>
 
-<!-- TOP BAR -->
-<header class="topbar">
-  <span class="logo">&#9634; HTML Viewer</span>
-  <div class="sep"></div>
+<nav>
+  <a href="#" class="nav-brand">H. Abuel Khier</a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#competencies">Expertise</a></li>
+    <li><a href="#education">Education</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
 
-  <label class="file-label" for="fileInput">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-    Upload HTML
-  </label>
-  <input type="file" id="fileInput" accept=".html,.htm">
-  <span class="file-name" id="fileName">No file selected</span>
-
-  <div class="spacer"></div>
-
-  <div class="tabs" id="tabsEl" style="display:none">
-    <button class="tab-btn active" data-tab="preview">Preview</button>
-    <button class="tab-btn" data-tab="source">Source</button>
-    <button class="tab-btn" data-tab="split">Split</button>
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">Human Resources Professional</div>
+    <h1>Hesham<br><span>Abuel Khier</span></h1>
+    <p class="hero-tagline">Strategic HR leader passionate about building exceptional teams, cultivating strong workplace culture, and driving organizational success through people-first solutions.</p>
+    <a href="#contact" class="hero-cta">
+      Get In Touch
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
   </div>
+</section>
 
-  <button class="action-btn" id="copyBtn" style="display:none">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-    Copy
-  </button>
-
-  <button class="action-btn" id="openNewBtn" style="display:none">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-    Open
-  </button>
-</header>
-
-<!-- MAIN -->
-<main class="main">
-
-  <!-- Drop zone (shown when no file loaded) -->
-  <div class="drop-zone" id="dropZone">
-    <div class="drop-icon">&#128196;</div>
-    <h2>Drop your HTML file here</h2>
-    <p>Upload any HTML file to instantly preview it and review the source code.</p>
-    <label class="drop-cta" for="fileInput">Choose a file</label>
-  </div>
-
-  <!-- Viewer (shown after file loaded) -->
-  <div class="viewer" id="viewer">
-
-    <!-- Preview tab -->
-    <div class="preview-panel visible" id="previewPanel">
-      <iframe id="previewFrame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" title="HTML Preview"></iframe>
-    </div>
-
-    <!-- Source tab -->
-    <div class="source-panel" id="sourcePanel">
-      <div class="source-toolbar">
-        <span>Source</span>
-        <span class="badge" id="linesCount">0 lines</span>
-        <span class="badge" id="sizeCount">0 B</span>
+<section id="about">
+  <div class="container">
+    <div class="about-grid">
+      <div class="about-avatar-wrap">
+        <div class="about-avatar">H</div>
       </div>
-      <pre class="source-code" id="sourceCode"></pre>
-    </div>
-
-    <!-- Split tab -->
-    <div class="split-panel" id="splitPanel">
-      <div class="split-left">
-        <div class="split-label">Preview</div>
-        <iframe id="splitFrame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" title="Split Preview"></iframe>
-      </div>
-      <div class="split-right" style="display:flex;flex-direction:column;">
-        <div class="split-label">Source</div>
-        <pre class="source-code" id="splitSource"></pre>
+      <div class="about-text">
+        <h3>About Me</h3>
+        <p>I am a dedicated Human Resources professional with a strong track record of aligning people strategies with organizational goals. My approach blends analytical thinking with genuine care for employee well-being.</p>
+        <p>I specialize in full-cycle recruitment, HR operations, talent development, and building policies that create positive, compliant, and productive workplaces.</p>
+        <p>I thrive in dynamic environments and am committed to supporting both employees and leadership in achieving their best potential.</p>
+        <div class="about-stats">
+          <div class="stat">
+            <span class="stat-num">5+</span>
+            <span class="stat-label">Years Experience</span>
+          </div>
+          <div class="stat">
+            <span class="stat-num">100+</span>
+            <span class="stat-label">Hires Managed</span>
+          </div>
+          <div class="stat">
+            <span class="stat-num">3+</span>
+            <span class="stat-label">Companies</span>
+          </div>
+        </div>
       </div>
     </div>
-
   </div>
+</section>
 
-</main>
+<section id="skills">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-label">What I Do</span>
+      <h2>Key HR Skills</h2>
+      <div class="divider"></div>
+    </div>
+    <div class="skills-grid">
+      <div class="skill-card">
+        <div class="skill-icon">🎯</div>
+        <h4>Talent Acquisition</h4>
+        <p>End-to-end recruitment — sourcing, screening, interviewing, and onboarding top talent that fits both the role and company culture.</p>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">📋</div>
+        <h4>HR Operations</h4>
+        <p>Managing employee records, HR systems, payroll coordination, and ensuring smooth day-to-day HR processes across the organization.</p>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">🤝</div>
+        <h4>Employee Relations</h4>
+        <p>Building trust between employees and management, resolving workplace conflicts, and maintaining a positive, respectful environment.</p>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">📈</div>
+        <h4>Performance Management</h4>
+        <p>Designing and implementing performance review frameworks, KPI tracking, and development plans to grow and retain top performers.</p>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">📚</div>
+        <h4>Training & Development</h4>
+        <p>Identifying skill gaps and designing learning programs that improve team capabilities and support employee career growth.</p>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">⚖️</div>
+        <h4>HR Policy & Compliance</h4>
+        <p>Developing and enforcing HR policies aligned with labor laws and regulations to protect the organization and its employees.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-<!-- Stats bar -->
-<footer class="stats-bar" id="statsBar">
-  <span><b id="statFile">—</b></span>
-  <span>Lines: <b id="statLines">—</b></span>
-  <span>Size: <b id="statSize">—</b></span>
-  <span>Characters: <b id="statChars">—</b></span>
+<section id="experience">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-label">Career Journey</span>
+      <h2>Work Experience</h2>
+      <div class="divider"></div>
+    </div>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-date">2022 – Present</div>
+        <h4>Senior HR Specialist</h4>
+        <div class="timeline-company">Company Name · Full-time</div>
+        <p>Led end-to-end recruitment for multiple departments, managed onboarding programs, and partnered with department heads to implement performance management cycles across the organization.</p>
+        <div class="timeline-tags">
+          <span class="tag">Recruitment</span>
+          <span class="tag">Onboarding</span>
+          <span class="tag">Performance Reviews</span>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-date">2020 – 2022</div>
+        <h4>HR Generalist</h4>
+        <div class="timeline-company">Company Name · Full-time</div>
+        <p>Oversaw employee relations, handled disciplinary processes, maintained HRIS records, and supported policy development to ensure regulatory compliance.</p>
+        <div class="timeline-tags">
+          <span class="tag">Employee Relations</span>
+          <span class="tag">HRIS</span>
+          <span class="tag">Compliance</span>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-date">2018 – 2020</div>
+        <h4>HR Coordinator</h4>
+        <div class="timeline-company">Company Name · Full-time</div>
+        <p>Coordinated hiring pipelines, supported payroll processing, and assisted in organizing company-wide training and engagement initiatives.</p>
+        <div class="timeline-tags">
+          <span class="tag">Hiring</span>
+          <span class="tag">Payroll Support</span>
+          <span class="tag">Training</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="competencies">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-label">Areas of Expertise</span>
+      <h2>Core Competencies</h2>
+      <div class="divider"></div>
+    </div>
+    <div class="competencies-grid">
+      <div class="competency-item"><div class="competency-dot"></div><span>Full-Cycle Recruiting</span></div>
+      <div class="competency-item"><div class="competency-dot"></div><span>Workforce Planning</span></div>
+      <div class="competency-item"><div class="competency-dot"></div><span>Compensation & Benefits</span></div>
+      <div class="competency-item"><div class="competency-dot"></div><span>Labor Law Compliance</span></div>
+      <div class="competency-item"><div class="competency-dot"></div><span>Conflict Resolution</span></div>
+      <div class="competency-item"><div class="competency-dot"></div><span>HRIS Management</span></div>
+      <div class="competency-item"><div class="competency-dot"></div><span>Change Management</span></div>
+      <div class="competency-item"><div class="competency-dot"></div><span>Organizational Development</span></div>
+      <div class="competency-item"><div class="competency-dot"></div><span>Employee Engagement</span></div>
+      <div class="competency-item"><div class="competency-dot"></div><span>Succession Planning</span></div>
+      <div class="competency-item"><div class="competency-dot"></div><span>Diversity & Inclusion</span></div>
+      <div class="competency-item"><div class="competency-dot"></div><span>Exit Interviews & Analytics</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="education">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-label">Academic Background</span>
+      <h2>Education</h2>
+      <div class="divider"></div>
+    </div>
+    <div class="education-cards">
+      <div class="edu-card">
+        <div class="edu-year">Year – Year</div>
+        <h4>Bachelor's Degree</h4>
+        <p>Field of Study · University Name</p>
+      </div>
+      <div class="edu-card">
+        <div class="edu-year">Year</div>
+        <h4>HR Certification</h4>
+        <p>e.g. SHRM-CP / PHR · Issuing Body</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="container">
+    <div class="contact-box">
+      <h3>Let's Work Together</h3>
+      <p>Open to new HR opportunities. Feel free to reach out — I'd love to connect.</p>
+      <div class="contact-links">
+        <a href="mailto:heshamabuelkhier@gmail.com" class="contact-link primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          heshamabuelkhier@gmail.com
+        </a>
+        <a href="https://www.linkedin.com/in/heshamabuelkhier" target="_blank" class="contact-link secondary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+          LinkedIn Profile
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>&copy; 2026 <span>Hesham Abuel Khier</span> · All Rights Reserved</p>
 </footer>
 
-<!-- Toast -->
-<div class="toast" id="toast">Copied to clipboard!</div>
-
-<script>
-  const fileInput   = document.getElementById('fileInput');
-  const fileNameEl  = document.getElementById('fileName');
-  const dropZone    = document.getElementById('dropZone');
-  const viewer      = document.getElementById('viewer');
-  const tabsEl      = document.getElementById('tabsEl');
-  const copyBtn     = document.getElementById('copyBtn');
-  const openNewBtn  = document.getElementById('openNewBtn');
-  const statsBar    = document.getElementById('statsBar');
-  const toast       = document.getElementById('toast');
-
-  const previewFrame = document.getElementById('previewFrame');
-  const splitFrame   = document.getElementById('splitFrame');
-  const sourceCodeEl = document.getElementById('sourceCode');
-  const splitSourceEl= document.getElementById('splitSource');
-  const linesCount   = document.getElementById('linesCount');
-  const sizeCount    = document.getElementById('sizeCount');
-  const statFile     = document.getElementById('statFile');
-  const statLines    = document.getElementById('statLines');
-  const statSize     = document.getElementById('statSize');
-  const statChars    = document.getElementById('statChars');
-
-  let currentRaw = '';
-  let currentBlobURL = null;
-  let activeTab = 'preview';
-
-  /* ── FILE LOADING ── */
-  fileInput.addEventListener('change', e => {
-    const file = e.target.files[0];
-    if (file) loadFile(file);
-  });
-
-  dropZone.addEventListener('dragover', e => {
-    e.preventDefault();
-    dropZone.classList.add('drag-over');
-  });
-  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
-  dropZone.addEventListener('drop', e => {
-    e.preventDefault();
-    dropZone.classList.remove('drag-over');
-    const file = e.dataTransfer.files[0];
-    if (file && (file.name.endsWith('.html') || file.name.endsWith('.htm'))) {
-      loadFile(file);
-    }
-  });
-  dropZone.addEventListener('click', e => {
-    if (e.target.tagName !== 'LABEL') fileInput.click();
-  });
-
-  function loadFile(file) {
-    const reader = new FileReader();
-    reader.onload = ev => {
-      const raw = ev.target.result;
-      renderContent(raw, file.name, file.size);
-    };
-    reader.readAsText(file);
-  }
-
-  function renderContent(raw, name, size) {
-    currentRaw = raw;
-
-    // Revoke previous blob
-    if (currentBlobURL) URL.revokeObjectURL(currentBlobURL);
-    currentBlobURL = URL.createObjectURL(new Blob([raw], { type: 'text/html' }));
-
-    // Set iframes
-    previewFrame.src = currentBlobURL;
-    splitFrame.src   = currentBlobURL;
-
-    // Syntax highlight source
-    const highlighted = highlight(raw);
-    sourceCodeEl.innerHTML  = highlighted;
-    splitSourceEl.innerHTML = highlighted;
-
-    // Stats
-    const lines = raw.split('\n').length;
-    const sizeStr = formatSize(size || new Blob([raw]).size);
-    linesCount.textContent = lines + ' lines';
-    sizeCount.textContent  = sizeStr;
-    statFile.textContent   = name;
-    statLines.textContent  = lines.toLocaleString();
-    statSize.textContent   = sizeStr;
-    statChars.textContent  = raw.length.toLocaleString();
-
-    // Filename in header
-    fileNameEl.textContent = name;
-    fileNameEl.classList.add('loaded');
-
-    // Show viewer
-    dropZone.style.display = 'none';
-    viewer.classList.add('visible');
-    tabsEl.style.display = '';
-    copyBtn.style.display = '';
-    openNewBtn.style.display = '';
-    statsBar.classList.add('visible');
-
-    // Stay on current tab
-    switchTab(activeTab);
-  }
-
-  /* ── TAB SWITCHING ── */
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
-  });
-
-  function switchTab(tab) {
-    activeTab = tab;
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-    document.getElementById('previewPanel').classList.toggle('visible', tab === 'preview');
-    document.getElementById('sourcePanel').classList.toggle('visible', tab === 'source');
-    document.getElementById('splitPanel').classList.toggle('visible', tab === 'split');
-    copyBtn.style.display = (tab === 'source' || tab === 'split') ? '' : 'none';
-  }
-
-  /* ── COPY ── */
-  copyBtn.addEventListener('click', () => {
-    navigator.clipboard.writeText(currentRaw).then(() => showToast('Copied to clipboard!'));
-  });
-
-  /* ── OPEN IN NEW TAB ── */
-  openNewBtn.addEventListener('click', () => {
-    if (currentBlobURL) window.open(currentBlobURL, '_blank');
-  });
-
-  /* ── TOAST ── */
-  function showToast(msg) {
-    toast.textContent = msg;
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2200);
-  }
-
-  /* ── UTILS ── */
-  function formatSize(bytes) {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
-  }
-
-  /* ── SYNTAX HIGHLIGHTER ── */
-  function highlight(html) {
-    // Escape for safe HTML rendering, then re-apply color spans
-    const escaped = html
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
-
-    return escaped
-      // DOCTYPE
-      .replace(/(&lt;!DOCTYPE[^&]*?&gt;)/gi, '<span class="hl-doctype">$1</span>')
-      // Comments
-      .replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<span class="hl-comment">$1</span>')
-      // Opening/closing tags with attributes
-      .replace(/(&lt;\/?)([\w\-:.]+)((?:\s+[\w\-:.]+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s&>]+))?)*\s*\/?)(&gt;)/g,
-        (m, open, tag, attrs, close) => {
-          const styledAttrs = attrs.replace(
-            /([\w\-:.]+)(\s*=\s*)("([^"]*?)"|'([^']*?)'|([^\s&>]+))/g,
-            '<span class="hl-attr">$1</span>$2<span class="hl-value">$3</span>'
-          ).replace(/^(\s+)([\w\-:.]+)(?=\s|$)/gm,
-            '$1<span class="hl-attr">$2</span>'
-          );
-          return `<span class="hl-tag">${open}${tag}</span>${styledAttrs}<span class="hl-tag">${close}</span>`;
-        }
-      );
-  }
-
-  /* ── KEYBOARD SHORTCUTS ── */
-  document.addEventListener('keydown', e => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'o') { e.preventDefault(); fileInput.click(); }
-    if ((e.ctrlKey || e.metaKey) && e.key === 'c' && activeTab !== 'preview' && currentRaw) {
-      e.preventDefault();
-      navigator.clipboard.writeText(currentRaw).then(() => showToast('Copied!'));
-    }
-    if (e.key === '1') switchTab('preview');
-    if (e.key === '2') switchTab('source');
-    if (e.key === '3') switchTab('split');
-  });
-</script>
 </body>
 </html>
