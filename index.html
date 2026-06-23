@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTML Viewer</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: #2e3350;
+    --accent: #4f8ef7;
+    --accent2: #7c5cfc;
+    --text: #e8eaf0;
+    --muted: #7b82a0;
+    --success: #3ecf8e;
+    --danger: #f7504f;
+    --radius: 10px;
+    --font: 'Inter', system-ui, -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  }
+
+  html, body { height: 100%; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 24px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+  .topbar .logo {
+    font-size: 17px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -.3px;
+    margin-right: 4px;
+  }
+  .topbar .sep { width: 1px; height: 22px; background: var(--border); margin: 0 4px; }
+
+  .file-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 16px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 6px;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity .18s, transform .12s;
+    user-select: none;
+    white-space: nowrap;
+  }
+  .file-label:hover { opacity: .88; transform: translateY(-1px); }
+  .file-label:active { transform: translateY(0); opacity: 1; }
+  #fileInput { display: none; }
+
+  .file-name {
+    font-size: 13px;
+    color: var(--muted);
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .file-name.loaded { color: var(--success); }
+
+  .spacer { flex: 1; }
+
+  .tabs {
+    display: flex;
+    gap: 2px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 3px;
+  }
+  .tab-btn {
+    padding: 5px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: background .15s, color .15s;
+  }
+  .tab-btn.active {
+    background: var(--surface2);
+    color: var(--text);
+  }
+  .tab-btn:hover:not(.active) { color: var(--text); }
+
+  .action-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+    white-space: nowrap;
+  }
+  .action-btn:hover { background: var(--border); border-color: var(--accent); }
+
+  /* ── MAIN ── */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── DROP ZONE ── */
+  .drop-zone {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 40px;
+    border: 2px dashed var(--border);
+    margin: 28px;
+    border-radius: 16px;
+    transition: border-color .2s, background .2s;
+    cursor: pointer;
+  }
+  .drop-zone.drag-over {
+    border-color: var(--accent);
+    background: rgba(79,142,247,.06);
+  }
+  .drop-icon {
+    width: 72px;
+    height: 72px;
+    background: var(--surface2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+  }
+  .drop-zone h2 {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .drop-zone p {
+    font-size: 14px;
+    color: var(--muted);
+    text-align: center;
+    max-width: 320px;
+    line-height: 1.6;
+  }
+  .drop-cta {
+    padding: 10px 24px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: opacity .18s, transform .12s;
+  }
+  .drop-cta:hover { opacity: .88; transform: translateY(-1px); }
+
+  /* ── VIEWER PANELS ── */
+  .viewer { flex: 1; display: none; flex-direction: column; overflow: hidden; }
+  .viewer.visible { display: flex; }
+
+  /* Preview panel */
+  .preview-panel { flex: 1; display: none; overflow: hidden; }
+  .preview-panel.visible { display: block; }
+  .preview-panel iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: #fff;
+  }
+
+  /* Source panel */
+  .source-panel {
+    flex: 1;
+    display: none;
+    overflow: hidden;
+    position: relative;
+  }
+  .source-panel.visible { display: flex; flex-direction: column; }
+  .source-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .source-toolbar .badge {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 12px;
+    color: var(--text);
+  }
+  .source-code {
+    flex: 1;
+    overflow: auto;
+    padding: 20px 24px;
+    font-family: var(--mono);
+    font-size: 13.5px;
+    line-height: 1.7;
+    white-space: pre;
+    color: #c9d1d9;
+    background: var(--bg);
+  }
+
+  /* Syntax highlight colors */
+  .hl-tag     { color: #7ee787; }
+  .hl-attr    { color: #79c0ff; }
+  .hl-value   { color: #a5d6ff; }
+  .hl-comment { color: #8b949e; font-style: italic; }
+  .hl-doctype { color: #8b949e; }
+  .hl-entity  { color: #ff7b72; }
+  .hl-text    { color: #c9d1d9; }
+
+  /* Split view */
+  .split-panel {
+    flex: 1;
+    display: none;
+    overflow: hidden;
+  }
+  .split-panel.visible { display: flex; }
+  .split-left, .split-right {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .split-left { border-right: 2px solid var(--border); }
+  .split-label {
+    padding: 6px 14px;
+    font-size: 11px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+  }
+  .split-left iframe {
+    flex: 1;
+    border: none;
+    background: #fff;
+  }
+  .split-right .source-code {
+    flex: 1;
+    overflow: auto;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+  /* Copy toast */
+  .toast {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--success);
+    color: #fff;
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity .25s, transform .25s;
+    pointer-events: none;
+    z-index: 9999;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Stats bar */
+  .stats-bar {
+    display: none;
+    align-items: center;
+    gap: 18px;
+    padding: 6px 20px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+  .stats-bar.visible { display: flex; }
+  .stats-bar span b { color: var(--text); font-weight: 600; }
+
+  @media (max-width: 640px) {
+    .topbar { padding: 10px 14px; gap: 8px; }
+    .drop-zone { margin: 14px; padding: 28px 20px; }
+    .split-panel { flex-direction: column; }
+    .split-left { border-right: none; border-bottom: 2px solid var(--border); }
+    .tabs { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<header class="topbar">
+  <span class="logo">&#9634; HTML Viewer</span>
+  <div class="sep"></div>
+
+  <label class="file-label" for="fileInput">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    Upload HTML
+  </label>
+  <input type="file" id="fileInput" accept=".html,.htm">
+  <span class="file-name" id="fileName">No file selected</span>
+
+  <div class="spacer"></div>
+
+  <div class="tabs" id="tabsEl" style="display:none">
+    <button class="tab-btn active" data-tab="preview">Preview</button>
+    <button class="tab-btn" data-tab="source">Source</button>
+    <button class="tab-btn" data-tab="split">Split</button>
+  </div>
+
+  <button class="action-btn" id="copyBtn" style="display:none">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+    Copy
+  </button>
+
+  <button class="action-btn" id="openNewBtn" style="display:none">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+    Open
+  </button>
+</header>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- Drop zone (shown when no file loaded) -->
+  <div class="drop-zone" id="dropZone">
+    <div class="drop-icon">&#128196;</div>
+    <h2>Drop your HTML file here</h2>
+    <p>Upload any HTML file to instantly preview it and review the source code.</p>
+    <label class="drop-cta" for="fileInput">Choose a file</label>
+  </div>
+
+  <!-- Viewer (shown after file loaded) -->
+  <div class="viewer" id="viewer">
+
+    <!-- Preview tab -->
+    <div class="preview-panel visible" id="previewPanel">
+      <iframe id="previewFrame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" title="HTML Preview"></iframe>
+    </div>
+
+    <!-- Source tab -->
+    <div class="source-panel" id="sourcePanel">
+      <div class="source-toolbar">
+        <span>Source</span>
+        <span class="badge" id="linesCount">0 lines</span>
+        <span class="badge" id="sizeCount">0 B</span>
+      </div>
+      <pre class="source-code" id="sourceCode"></pre>
+    </div>
+
+    <!-- Split tab -->
+    <div class="split-panel" id="splitPanel">
+      <div class="split-left">
+        <div class="split-label">Preview</div>
+        <iframe id="splitFrame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" title="Split Preview"></iframe>
+      </div>
+      <div class="split-right" style="display:flex;flex-direction:column;">
+        <div class="split-label">Source</div>
+        <pre class="source-code" id="splitSource"></pre>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<!-- Stats bar -->
+<footer class="stats-bar" id="statsBar">
+  <span><b id="statFile">—</b></span>
+  <span>Lines: <b id="statLines">—</b></span>
+  <span>Size: <b id="statSize">—</b></span>
+  <span>Characters: <b id="statChars">—</b></span>
+</footer>
+
+<!-- Toast -->
+<div class="toast" id="toast">Copied to clipboard!</div>
+
+<script>
+  const fileInput   = document.getElementById('fileInput');
+  const fileNameEl  = document.getElementById('fileName');
+  const dropZone    = document.getElementById('dropZone');
+  const viewer      = document.getElementById('viewer');
+  const tabsEl      = document.getElementById('tabsEl');
+  const copyBtn     = document.getElementById('copyBtn');
+  const openNewBtn  = document.getElementById('openNewBtn');
+  const statsBar    = document.getElementById('statsBar');
+  const toast       = document.getElementById('toast');
+
+  const previewFrame = document.getElementById('previewFrame');
+  const splitFrame   = document.getElementById('splitFrame');
+  const sourceCodeEl = document.getElementById('sourceCode');
+  const splitSourceEl= document.getElementById('splitSource');
+  const linesCount   = document.getElementById('linesCount');
+  const sizeCount    = document.getElementById('sizeCount');
+  const statFile     = document.getElementById('statFile');
+  const statLines    = document.getElementById('statLines');
+  const statSize     = document.getElementById('statSize');
+  const statChars    = document.getElementById('statChars');
+
+  let currentRaw = '';
+  let currentBlobURL = null;
+  let activeTab = 'preview';
+
+  /* ── FILE LOADING ── */
+  fileInput.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (file) loadFile(file);
+  });
+
+  dropZone.addEventListener('dragover', e => {
+    e.preventDefault();
+    dropZone.classList.add('drag-over');
+  });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file && (file.name.endsWith('.html') || file.name.endsWith('.htm'))) {
+      loadFile(file);
+    }
+  });
+  dropZone.addEventListener('click', e => {
+    if (e.target.tagName !== 'LABEL') fileInput.click();
+  });
+
+  function loadFile(file) {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const raw = ev.target.result;
+      renderContent(raw, file.name, file.size);
+    };
+    reader.readAsText(file);
+  }
+
+  function renderContent(raw, name, size) {
+    currentRaw = raw;
+
+    // Revoke previous blob
+    if (currentBlobURL) URL.revokeObjectURL(currentBlobURL);
+    currentBlobURL = URL.createObjectURL(new Blob([raw], { type: 'text/html' }));
+
+    // Set iframes
+    previewFrame.src = currentBlobURL;
+    splitFrame.src   = currentBlobURL;
+
+    // Syntax highlight source
+    const highlighted = highlight(raw);
+    sourceCodeEl.innerHTML  = highlighted;
+    splitSourceEl.innerHTML = highlighted;
+
+    // Stats
+    const lines = raw.split('\n').length;
+    const sizeStr = formatSize(size || new Blob([raw]).size);
+    linesCount.textContent = lines + ' lines';
+    sizeCount.textContent  = sizeStr;
+    statFile.textContent   = name;
+    statLines.textContent  = lines.toLocaleString();
+    statSize.textContent   = sizeStr;
+    statChars.textContent  = raw.length.toLocaleString();
+
+    // Filename in header
+    fileNameEl.textContent = name;
+    fileNameEl.classList.add('loaded');
+
+    // Show viewer
+    dropZone.style.display = 'none';
+    viewer.classList.add('visible');
+    tabsEl.style.display = '';
+    copyBtn.style.display = '';
+    openNewBtn.style.display = '';
+    statsBar.classList.add('visible');
+
+    // Stay on current tab
+    switchTab(activeTab);
+  }
+
+  /* ── TAB SWITCHING ── */
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  });
+
+  function switchTab(tab) {
+    activeTab = tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    document.getElementById('previewPanel').classList.toggle('visible', tab === 'preview');
+    document.getElementById('sourcePanel').classList.toggle('visible', tab === 'source');
+    document.getElementById('splitPanel').classList.toggle('visible', tab === 'split');
+    copyBtn.style.display = (tab === 'source' || tab === 'split') ? '' : 'none';
+  }
+
+  /* ── COPY ── */
+  copyBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(currentRaw).then(() => showToast('Copied to clipboard!'));
+  });
+
+  /* ── OPEN IN NEW TAB ── */
+  openNewBtn.addEventListener('click', () => {
+    if (currentBlobURL) window.open(currentBlobURL, '_blank');
+  });
+
+  /* ── TOAST ── */
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2200);
+  }
+
+  /* ── UTILS ── */
+  function formatSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+  }
+
+  /* ── SYNTAX HIGHLIGHTER ── */
+  function highlight(html) {
+    // Escape for safe HTML rendering, then re-apply color spans
+    const escaped = html
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+
+    return escaped
+      // DOCTYPE
+      .replace(/(&lt;!DOCTYPE[^&]*?&gt;)/gi, '<span class="hl-doctype">$1</span>')
+      // Comments
+      .replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<span class="hl-comment">$1</span>')
+      // Opening/closing tags with attributes
+      .replace(/(&lt;\/?)([\w\-:.]+)((?:\s+[\w\-:.]+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s&>]+))?)*\s*\/?)(&gt;)/g,
+        (m, open, tag, attrs, close) => {
+          const styledAttrs = attrs.replace(
+            /([\w\-:.]+)(\s*=\s*)("([^"]*?)"|'([^']*?)'|([^\s&>]+))/g,
+            '<span class="hl-attr">$1</span>$2<span class="hl-value">$3</span>'
+          ).replace(/^(\s+)([\w\-:.]+)(?=\s|$)/gm,
+            '$1<span class="hl-attr">$2</span>'
+          );
+          return `<span class="hl-tag">${open}${tag}</span>${styledAttrs}<span class="hl-tag">${close}</span>`;
+        }
+      );
+  }
+
+  /* ── KEYBOARD SHORTCUTS ── */
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'o') { e.preventDefault(); fileInput.click(); }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'c' && activeTab !== 'preview' && currentRaw) {
+      e.preventDefault();
+      navigator.clipboard.writeText(currentRaw).then(() => showToast('Copied!'));
+    }
+    if (e.key === '1') switchTab('preview');
+    if (e.key === '2') switchTab('source');
+    if (e.key === '3') switchTab('split');
+  });
+</script>
+</body>
+</html>
